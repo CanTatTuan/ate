@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATE của Tuấn</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      padding: 10px;
+      background-color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header button {
+      background-color: #555;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .header button:hover {
+      background-color: #666;
+    }
+    .test-code-display {
+      margin: 20px;
+      padding: 10px;
+      background-color: #444;
+      border-radius: 5px;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+    .test-code-display.testing {
+      background-color: #f1c40f; /* Yellow when testing */
+    }
+    .test-code-display.passed {
+      background-color: #2ecc71; /* Green when test passed */
+    }
+    .test-code-display.failed {
+      background-color: #e74c3c; /* Red when test failed */
+    }
+    .content {
+      padding: 20px;
+    }
+    .test-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .test-table th, .test-table td {
+      border: 1px solid #444;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .test-table th {
+      background-color: #555;
+    }
+    .test-table .status-success {
+      background-color: #2ecc71;
+      color: #000;
+    }
+    .test-table .status-fail {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+    .results {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .results .result-item {
+      text-align: center;
+    }
+    .results .result-item span {
+      display: block;
+      font-size: 20px;
+      margin-top: 5px;
+    }
+    .results .result-item.pass {
+      background-color: #2ecc71; /* Green */
+    }
+    .results .result-item.fail {
+      background-color: #e74c3c; /* Red */
+    }
+    .input-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none; /* Initially hidden */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .input-box {
+      background: #333;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    .input-box input {
+      width: 200px;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 3px;
+    }
+    .input-box button {
+      background-color: #2ecc71;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .input-box #cancelTest {
+      background-color: #e21717;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .input-box button:hover {
+      background-color: #27ae60;
+    }
+    /* Modal for errors */
+    .error-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .error-modal .modal-content {
+      background: #444;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      color: #fff;
+      width: 50%;
+    }
+    .error-modal ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .error-modal li {
+      background-color: #e74c3c;
+      padding: 10px;
+      margin: 5px 0;
+      color: #fff;
+      border-radius: 3px;
+    }
+    .error-modal button {
+      background-color: #2ecc71;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      border-radius: 3px;
+    }
+    .error-modal button:hover {
+      background-color: #27ae60;
+    }
+    /* Progress Bar */
+    .progress-container {
+      margin-top: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    progress {
+      width: 100%;
+      height: 20px;
+      border-radius: 5px;
+      background-color: #444;
+      appearance: none;
+    }
+
+    progress::-webkit-progress-bar {
+      background-color: #444;
+      border-radius: 5px;
+    }
+
+    progress::-webkit-progress-value {
+      background-color: #2ecc71; /* Green */
+      border-radius: 5px;
+    }
+
+    progress::-moz-progress-bar {
+      background-color: #2ecc71;
+      border-radius: 5px;
+    }
+
+    .progress-container {
+  margin-top: 20px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+}
+
+progress {
+  width: 100%;
+  height: 20px;
+  border-radius: 5px;
+  background-color: #444;
+  appearance: none;
+}
+
+progress::-webkit-progress-bar {
+  background-color: #444;
+  border-radius: 5px;
+}
+
+progress::-webkit-progress-value {
+  background-color: #2ecc71; /* Green */
+  border-radius: 5px;
+}
+
+progress::-moz-progress-bar {
+  background-color: #2ecc71;
+  border-radius: 5px;
+}
+
+.progress-container span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ATE Test Interface / ATE 测试接口
+    </h1>
+    <button id="startTest">Start Test</button>
+  </div>
+  <div class="test-code-display" id="testCodeDisplay" style="display: none;">
+    <strong id="testCodeLabel">Testing name / 测试名称 :</strong> <span id="currentTestCode"></span>
+  </div>
+  <div class="content">
+    <table class="test-table">
+      <thead>
+        <tr>
+          <th>Test Step</th>
+          <th>Status</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="testBody">
+        <tr>
+          <td>Có đẹp zai xinh gái không ? / 你又帅又漂亮吗？</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Không bị ngáo đá ảo tưởng ! / 不要妄想和上瘾！</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Có tốt bụng không ? / 你善良吗？</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Có chăm chỉ không ? / 你勤奋吗？</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Có học giỏi không ? / 你学习成绩好吗？</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>End Test</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+      </tbody>
+    </table>
+
+<!-- Progress Bar -->
+<div class="progress-container">
+  <progress id="testProgress" value="0" max="100"></progress>
+  <span>0%</span> <!-- Thêm phần trăm vào đây -->
+</div>
+
+    <div class="results">
+      <div class="result-item" id="passResult">
+        <strong>Pass Rate</strong>
+        <span id="passRate">0%</span>
+      </div>
+      <div class="result-item" id="totalResult">
+        <strong>Total</strong>
+        <span id="totalTests">0</span>
+      </div>
+      <div class="result-item" id="passedResult">
+        <strong>Passed</strong>
+        <span id="passedTests">0</span>
+      </div>
+      <div class="result-item" id="failedResult">
+        <strong>Failed</strong>
+        <span id="failedTests">0</span>
+      </div>
+    </div>
+    
+    
+  </div>
+
+  <!-- Input Overlay -->
+  <div class="input-overlay" id="inputOverlay">
+    <div class="input-box">
+      <h2>Nhập tên người muốn test</h2>
+      <input type="text" id="testCode" placeholder="Enter name here..." />
+      <button id="submitCode">OK</button>
+      <button id="cancelTest">Cancel</button> <!-- Cancel Button -->
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="error-modal" id="errorModal">
+    <div class="modal-content">
+      <h2>Test Failures / Thử nghiệm thất bại</h2>
+      <ul id="errorList"></ul>
+      <button id="closeModal">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const testSteps = [
+      { name: "Có đẹp zai xinh gái không ? / 你又帅又漂亮吗？", status: "Pending" },
+      { name: "Không bị ngáo đá ảo tưởng ! / 不要妄想和上瘾！", status: "Pending" },
+      { name: "Có tốt bụng không ? / 你善良吗？", status: "Pending" },
+      { name: "Có chăm chỉ không ? / 你勤奋吗？", status: "Pending" },
+      { name: "Có học giỏi không ? / 你学习成绩好吗？", status: "Pending" },
+      { name: "End Test", status: "Pending" }
+    ];
+
+    const testBody = document.getElementById("testBody");
+    const passRate = document.getElementById("passRate");
+    const totalTests = document.getElementById("totalTests");
+    const passedTests = document.getElementById("passedTests");
+    const failedTests = document.getElementById("failedTests");
+    const startButton = document.getElementById("startTest");
+    const inputOverlay = document.getElementById("inputOverlay");
+    const testCodeInput = document.getElementById("testCode");
+    const submitCodeButton = document.getElementById("submitCode");
+    const testCodeDisplay = document.getElementById("testCodeDisplay");
+    const currentTestCode = document.getElementById("currentTestCode");
+    const testCodeLabel = document.getElementById("testCodeLabel");
+    const errorModal = document.getElementById("errorModal");
+    const closeModalButton = document.getElementById("closeModal");
+    const errorList = document.getElementById("errorList");
+    const cancelTestButton = document.getElementById("cancelTest");
+    const testProgress = document.getElementById("testProgress");
+
+    let testCode = "";
+
+    function resetForNextTest() {
+      setTimeout(() => {
+        testCode = "";
+        testCodeInput.value = "";
+        inputOverlay.style.display = "flex";  // Show input overlay again
+        testCodeDisplay.style.display = "none";  // Hide the test code display
+      }, 3000);
+    }
+
+    function updateResults() {
+      const total = testSteps.length;
+      const passed = testSteps.filter(test => test.status === "Passed").length;
+      const failed = testSteps.filter(test => test.status === "Failed").length;
+      const passPercentage = ((passed / total) * 100).toFixed(2);
+
+      totalTests.textContent = total;
+      passedTests.textContent = passed;
+      failedTests.textContent = failed;
+      passRate.textContent = `${passPercentage}%`;
+
+      if (failed === 0) {
+        testCodeDisplay.classList.add('passed');
+      } else {
+        testCodeDisplay.classList.add('failed');
+      }
+
+      if (failed > 0) {
+        const failedTestsNames = testSteps.filter(test => test.status === "Failed").map(test => test.name);
+        errorList.innerHTML = failedTestsNames.map(testName => `<li>${testName}</li>`).join('');
+        errorModal.style.display = "flex";
+      }
+
+      // Change "Testing Code" to "Test end"
+      testCodeLabel.textContent = 'Test end:';
+      currentTestCode.textContent = testCode;
+
+      resetForNextTest();
+    }
+
+    function updateTable() {
+      testBody.innerHTML = "";
+      testSteps.forEach((test) => {
+        const row = document.createElement("tr");
+        const statusClass = test.status === "Passed" ? "status-success" : test.status === "Failed" ? "status-fail" : "";
+
+        row.innerHTML = `
+          <td>${test.name}</td>
+          <td class="status ${statusClass}">${test.status}</td>
+          <td class="${statusClass}">${test.status === "Pending" ? "-" : test.status}</td>
+        `;
+        testBody.appendChild(row);
+      });
+    }
+
+    function updateProgressBar(progress) {
+  testProgress.value = progress;
+  const progressText = document.querySelector(".progress-container span");
+  progressText.textContent = `${Math.round(progress)}%`; // Hiển thị phần trăm trên thanh tiến trình
+}
+
+    function runTests() {
+      let completedTests = 0;
+      testSteps.forEach((test, index) => {
+        setTimeout(() => {
+          const isPassed = Math.random() > 0.3;
+          test.status = isPassed ? "Passed" : "Failed";
+          completedTests = index + 1;
+          updateTable();
+          updateProgressBar((completedTests / testSteps.length) * 100); // Update progress
+
+          if (index === testSteps.length - 1) {
+            updateResults();
+          }
+        }, index * 1000);
+      });
+    }
+
+    startButton.addEventListener("click", () => {
+      inputOverlay.style.display = "flex";
+    });
+
+    submitCodeButton.addEventListener("click", () => {
+      testCode = testCodeInput.value.trim();
+      if (!testCode) {
+        alert("Không để trống!");
+        return;
+      }
+      testCodeDisplay.style.display = "block";
+      testCodeDisplay.classList.add('testing');  // Set to testing color (yellow)
+      currentTestCode.textContent = testCode;
+      testSteps.forEach(test => test.status = "Pending");
+      updateTable();
+      runTests();
+      inputOverlay.style.display = "none";
+    });
+
+    cancelTestButton.addEventListener("click", () => {
+      testCode = "";
+      testCodeInput.value = "";
+      inputOverlay.style.display = "none";
+    });
+
+    closeModalButton.addEventListener("click", () => {
+      errorModal.style.display = "none";
+    });
+  </script>
+
+      <!-- Start coppyright-->
+<div class="copyright " style="color:whitesmoke">
+  <marquee>
+      - - - - - - - Đơn vị phát triển / 开发单位 : Fsofter/FQC Tất Tuấn - Fsofter/FQC达团 - - - - - - -
+  </marquee>
+</div>
+<!-- end copy right -->
+</body>
+</html>
