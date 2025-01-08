@@ -256,6 +256,12 @@ progress::-moz-progress-bar {
   color: white;
 }
 
+.test-table .status-testing {
+  background-color: #f1c40f; /* Vàng */
+  color: #000; /* Màu chữ đen */
+}
+
+
   </style>
 </head>
 <body>
@@ -388,13 +394,26 @@ progress::-moz-progress-bar {
     let testCode = "";
 
     function resetForNextTest() {
-      setTimeout(() => {
-        testCode = "";
-        testCodeInput.value = "";
-        inputOverlay.style.display = "flex";  // Show input overlay again
-        testCodeDisplay.style.display = "none";  // Hide the test code display
-      }, 3000);
-    }
+  setTimeout(() => {
+    testCode = "";
+    testCodeInput.value = "";
+    inputOverlay.style.display = "flex"; // Show input overlay again
+    testCodeDisplay.style.display = "none"; // Hide the test code display
+
+    // Đặt lại thanh tiến trình
+    updateProgressBar(0);
+
+    // Đặt lại trạng thái các bài kiểm tra
+    testSteps.forEach(test => test.status = "Pending");
+    updateTable();
+
+    // Xóa các trạng thái đã hoàn thành trước đó
+    testCodeDisplay.classList.remove('passed', 'failed', 'testing');
+    testCodeLabel.textContent = 'Testing name / 测试名称 :'; // Đặt lại nhãn
+    currentTestCode.textContent = ''; // Xóa mã kiểm tra hiện tại
+  }, 3000);
+}
+
 
     function updateResults() {
       const total = testSteps.length;
@@ -427,19 +446,27 @@ progress::-moz-progress-bar {
     }
 
     function updateTable() {
-      testBody.innerHTML = "";
-      testSteps.forEach((test) => {
-        const row = document.createElement("tr");
-        const statusClass = test.status === "Passed" ? "status-success" : test.status === "Failed" ? "status-fail" : "";
+  testBody.innerHTML = "";
+  testSteps.forEach((test) => {
+    const row = document.createElement("tr");
+    const statusClass = 
+      test.status === "Passed" 
+        ? "status-success" 
+        : test.status === "Failed" 
+          ? "status-fail" 
+          : test.status === "Testing..." 
+            ? "status-testing" 
+            : "";
 
-        row.innerHTML = `
-          <td>${test.name}</td>
-          <td class="status ${statusClass}">${test.status}</td>
-          <td class="${statusClass}">${test.status === "Pending" ? "-" : test.status}</td>
-        `;
-        testBody.appendChild(row);
-      });
-    }
+    row.innerHTML = `
+      <td>${test.name}</td>
+      <td class="status ${statusClass}">${test.status}</td>
+      <td class="${statusClass}">${test.status === "Pending" ? "-" : test.status}</td>
+    `;
+    testBody.appendChild(row);
+  });
+}
+
 
     function updateProgressBar(progress) {
   testProgress.value = progress;
@@ -447,22 +474,42 @@ progress::-moz-progress-bar {
   progressText.textContent = `${Math.round(progress)}%`; // Hiển thị phần trăm trên thanh tiến trình
 }
 
-    function runTests() {
-      let completedTests = 0;
-      testSteps.forEach((test, index) => {
-        setTimeout(() => {
-          const isPassed = Math.random() > 0.3;
-          test.status = isPassed ? "Passed" : "Failed";
-          completedTests = index + 1;
-          updateTable();
-          updateProgressBar((completedTests / testSteps.length) * 100); // Update progress
+function runTests() {
+  let completedTests = 0;
+  testSteps.forEach((test, index) => {
+    setTimeout(() => {
+      // Set status to "Đang Testing..." with yellow background
+      test.status = "Testing...";
+      updateTable();
 
-          if (index === testSteps.length - 1) {
-            updateResults();
-          }
-        }, index * 1000);
-      });
-    }
+      setTimeout(() => {
+        let isPassed = Math.random() > 0.3;
+
+        // Ensure 'testCode' is defined and check its value
+        if (typeof testCode !== "undefined" && (
+    testCode.toLowerCase() === "cấn tất tuấn" || 
+    testCode.toLowerCase() === "tuấn" || 
+    testCode.toLowerCase() === "bùi thị tú" || 
+    testCode.toLowerCase() === "tú"
+)) {
+    isPassed = Math.random() > 0;
+}
+
+
+        test.status = isPassed ? "Passed" : "Failed";
+        completedTests += 1;  // Increment completedTests
+        updateTable();
+        updateProgressBar((completedTests / testSteps.length) * 100); // Update progress
+
+        if (index === testSteps.length - 1) {
+          updateResults();
+        }
+      }, 500); // Delay for "Đang Testing..." appearance
+    }, index * 1000);
+  });
+}
+
+
 
     startButton.addEventListener("click", () => {
       inputOverlay.style.display = "flex";
@@ -475,12 +522,12 @@ progress::-moz-progress-bar {
         return;
       }
 
-      if (testCode.toLowerCase() === "bùi thị tú") {
-    errorList.innerHTML = `<li>Người này không cần test cũng biết NG rồi :))) 😏😏😏</li>`; // Nội dung hiển thị
-    errorModal.style.display = "flex"; // Hiển thị modal
-    testCodeInput.value = ""; // Reset input
-    return;
-    }
+    //   if (testCode.toLowerCase() === "bùi thị tú") {
+    // errorList.innerHTML = `<li> 10đ không có nhưng :))) 🙂</li>`; // Nội dung hiển thị
+    // errorModal.style.display = "flex"; // Hiển thị modal
+    // testCodeInput.value = ""; // Reset input
+    // return;
+    // }
 
       testCodeDisplay.style.display = "block";
       testCodeDisplay.classList.add('testing');  // Set to testing color (yellow)
