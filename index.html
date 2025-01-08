@@ -474,6 +474,14 @@ progress::-moz-progress-bar {
         alert("Không để trống!");
         return;
       }
+
+      if (testCode.toLowerCase() === "bùi thị tú") {
+    errorList.innerHTML = `<li>Người này không cần test cũng biết NG rồi :))) 😏😏😏</li>`; // Nội dung hiển thị
+    errorModal.style.display = "flex"; // Hiển thị modal
+    testCodeInput.value = ""; // Reset input
+    return;
+    }
+
       testCodeDisplay.style.display = "block";
       testCodeDisplay.classList.add('testing');  // Set to testing color (yellow)
       currentTestCode.textContent = testCode;
