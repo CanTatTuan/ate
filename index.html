@@ -551,7 +551,7 @@ let ischitu = false;  // Biến để kiểm tra xem tên có phải là Tú hay
 
 async function runTestStep(test, index) {
   return new Promise((resolve) => {
-    const delay = getRandomDelay(500, 1000); // Random delay cho từng test case
+    const delay = getRandomDelay(500, 5000); // Random delay cho từng test case
     console.log(`Bắt đầu test case ${index + 1} sau ${delay}ms`);
 
     // Đặt trạng thái "Testing..."
