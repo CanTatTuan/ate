@@ -284,6 +284,11 @@ progress::-moz-progress-bar {
       </thead>
       <tbody id="testBody">
         <tr>
+          <td>Tên người test / 检查姓名</td>
+          <td class="status">Pending</td>
+          <td>-</td>
+        </tr>
+        <tr>
           <td>Có đẹp zai xinh gái không ? / 你又帅又漂亮吗？</td>
           <td class="status">Pending</td>
           <td>-</td>
@@ -364,14 +369,16 @@ progress::-moz-progress-bar {
   </div>
 
   <script>
-    const testSteps = [
-      { name: "Có đẹp zai xinh gái không ? / 你又帅又漂亮吗？", status: "Pending" },
-      { name: "Không bị ngáo đá ảo tưởng ! / 不要妄想和上瘾！", status: "Pending" },
-      { name: "Có tốt bụng không ? / 你善良吗？", status: "Pending" },
-      { name: "Có chăm chỉ không ? / 你勤奋吗？", status: "Pending" },
-      { name: "Có học giỏi không ? / 你学习成绩好吗？", status: "Pending" },
-      { name: "End Test", status: "Pending" }
-    ];
+ const testSteps = [
+ { name: "Tên người test / 检查姓名", status: "Pending" }, // Thêm test case
+  { name: "Có đẹp zai xinh gái không ? / 你又帅又漂亮吗？", status: "Pending" },
+  { name: "Không bị ngáo đá ảo tưởng ! / 不要妄想和上瘾！", status: "Pending" },
+  { name: "Có tốt bụng không ? / 你善良吗？", status: "Pending" },
+  { name: "Có chăm chỉ không ? / 你勤奋吗？", status: "Pending" },
+  { name: "Có học giỏi không ? / 你学习成绩好吗？", status: "Pending" },
+  { name: "End Test", status: "Pending" }
+];
+
 
     const testBody = document.getElementById("testBody");
     const passRate = document.getElementById("passRate");
@@ -445,6 +452,7 @@ progress::-moz-progress-bar {
       resetForNextTest();
     }
 
+
     function updateTable() {
   testBody.innerHTML = "";
   testSteps.forEach((test) => {
@@ -460,12 +468,16 @@ progress::-moz-progress-bar {
 
     row.innerHTML = `
       <td>${test.name}</td>
-      <td class="status ${statusClass}">${test.status}</td>
-      <td class="${statusClass}">${test.status === "Pending" ? "-" : test.status}</td>
+      <td class="status ${statusClass}">${test.status === "Passed" ? "OK" : test.status === "Failed" ? "Error" : test.status}</td>
+      <td class="${statusClass}">${test.name === "Tên người test / 检查姓名" ? testCode : test.status === "Passed" ? "Passed" : test.result || "-"}</td>
     `;
+
     testBody.appendChild(row);
   });
 }
+
+
+
 
 
     function updateProgressBar(progress) {
@@ -474,40 +486,129 @@ progress::-moz-progress-bar {
   progressText.textContent = `${Math.round(progress)}%`; // Hiển thị phần trăm trên thanh tiến trình
 }
 
-function runTests() {
-  let completedTests = 0;
-  testSteps.forEach((test, index) => {
-    setTimeout(() => {
-      // Set status to "Đang Testing..." with yellow background
-      test.status = "Testing...";
-      updateTable();
 
-      setTimeout(() => {
+
+function getRandomDelay(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// async function runTestStep(test, index) {
+//   return new Promise((resolve) => {
+//     const delay = getRandomDelay(500, 5000); // Random delay cho từng test case
+//     console.log(`Bắt đầu test case ${index + 1} sau ${delay}ms`);
+
+//     // Đặt trạng thái "Testing..."
+//     test.status = "Testing...";
+//     updateTable();
+
+//     setTimeout(() => {
+//       if (test.name === "Tên người test / 检查姓名") {
+//         // Xử lý riêng cho "Checkten"
+//         test.status = "Passed";
+//         test.result = testCode; // Lấy tên đã nhập
+//       } else {
+//         let isPassed = Math.random() > 0.3;
+
+//         // Kiểm tra giá trị `testCode` nếu cần
+//         if (
+//           typeof testCode !== "undefined" &&
+//           (testCode.toLowerCase() === "cấn tất tuấn" ||
+//             testCode.toLowerCase() === "tuấn" ||
+//             testCode.toLowerCase() === "bùi thị tú" ||
+//             testCode.toLowerCase() === "tú")
+//         ) {
+//           isPassed = Math.random() > 0;
+//         }
+
+//         // Cập nhật trạng thái Passed/Failed
+//         test.status = isPassed ? "Passed" : "Failed";
+//         test.result = isPassed ? "OK" : "Error";
+//       }
+
+//       updateTable(); // Chỉ cập nhật giao diện sau khi trạng thái hoàn thành
+//       resolve(); // Hoàn thành test case hiện tại
+//     }, delay);
+//   });
+// }
+
+
+
+// async function runTests() {
+//   for (let i = 0; i < testSteps.length; i++) {
+//     await runTestStep(testSteps[i], i); // Chạy từng test case tuần tự
+//     const progress = ((i + 1) / testSteps.length) * 100;
+//     updateProgressBar(progress); // Cập nhật progress bar
+//   }
+
+//   updateResults(); // Cập nhật kết quả cuối cùng sau khi hoàn tất tất cả test cases
+// }
+
+
+
+
+
+let ischitu = false;  // Biến để kiểm tra xem tên có phải là Tú hay Bùi Thị Tú không
+
+async function runTestStep(test, index) {
+  return new Promise((resolve) => {
+    const delay = getRandomDelay(500, 1000); // Random delay cho từng test case
+    console.log(`Bắt đầu test case ${index + 1} sau ${delay}ms`);
+
+    // Đặt trạng thái "Testing..."
+    test.status = "Testing...";
+    updateTable();
+
+    setTimeout(() => {
+      
+      if (test.name === "Tên người test / 检查姓名") {
+        // Kiểm tra nếu tên là "Tú" hoặc "Bùi Thị Tú"
+        if (testCode.toLowerCase() === "tú" || testCode.toLowerCase() === "bùi thị tú") {
+          ischitu = true;
+        }
+
+        // Xử lý riêng cho "Tên người test"
+        test.status = "Passed";
+        test.result = testCode; // Lấy tên đã nhập
+      } else {
         let isPassed = Math.random() > 0.3;
 
-        // Ensure 'testCode' is defined and check its value
-        if (typeof testCode !== "undefined" && (
-    testCode.toLowerCase() === "cấn tất tuấn" || 
-    testCode.toLowerCase() === "tuấn" || 
-    testCode.toLowerCase() === "bùi thị tú" || 
-    testCode.toLowerCase() === "tú"
-)) {
-    isPassed = Math.random() > 0;
-}
-
-
-        test.status = isPassed ? "Passed" : "Failed";
-        completedTests += 1;  // Increment completedTests
-        updateTable();
-        updateProgressBar((completedTests / testSteps.length) * 100); // Update progress
-
-        if (index === testSteps.length - 1) {
-          updateResults();
+        // Kiểm tra giá trị `testCode` nếu cần
+        if (
+          typeof testCode !== "undefined" &&
+          (testCode.toLowerCase() === "cấn tất tuấn" ||
+            testCode.toLowerCase() === "tuấn" ||
+            testCode.toLowerCase() === "bùi thị tú" ||
+            testCode.toLowerCase() === "tú")
+        ) {
+          isPassed = Math.random() > 0;
         }
-      }, 500); // Delay for "Đang Testing..." appearance
-    }, index * 1000);
+
+        // Cập nhật trạng thái Passed/Failed
+        test.status = isPassed ? "Passed" : "Failed";
+        test.result = isPassed ? "OK" : "Error";
+      }
+
+      updateTable(); // Chỉ cập nhật giao diện sau khi trạng thái hoàn thành
+      resolve(); // Hoàn thành test case hiện tại
+    }, delay);
   });
 }
+
+async function runTests() {
+  for (let i = 0; i < testSteps.length; i++) {
+    await runTestStep(testSteps[i], i); // Chạy từng test case tuần tự
+    const progress = ((i + 1) / testSteps.length) * 100;
+    updateProgressBar(progress); // Cập nhật progress bar
+  }
+
+  // Sau khi tất cả test cases hoàn tất, kiểm tra biến `ischitu`
+  if (ischitu) {
+    alert("Chị Tú 10 điểm không có nhưng test làm gì!");
+  }
+   ischitu = false;
+  updateResults(); // Cập nhật kết quả cuối cùng sau khi hoàn tất tất cả test cases
+}
+
 
 
 
